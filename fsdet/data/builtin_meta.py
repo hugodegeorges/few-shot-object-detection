@@ -7,6 +7,13 @@ KILI_CATEGORIES = [
     {"color": [0, 0, 230], "isthing": 1, "id": 3, "name": "NOT_PLASTIC_WASTE"},
 ]
 
+SEVERSTAL_CATEGORIES = [
+    {"color": [220, 20, 60], "isthing": 1, "id": 1, "name": "DEFECT_CLASS_1"},
+    {"color": [119, 11, 32], "isthing": 1, "id": 2, "name": "DEFECT_CLASS_2"},
+    {"color": [0, 0, 142], "isthing": 1, "id": 3, "name": "DEFECT_CLASS_3"},
+    {"color": [0, 0, 230], "isthing": 1, "id": 4, "name": "DEFECT_CLASS_4"},
+]
+
 COCO_CATEGORIES = [
     {"color": [220, 20, 60], "isthing": 1, "id": 1, "name": "person"},
     {"color": [119, 11, 32], "isthing": 1, "id": 2, "name": "bicycle"},
@@ -457,6 +464,44 @@ def _get_kili_fewshot_instances_meta():
     ret["base_dataset_id_to_contiguous_id"] = base_dataset_id_to_contiguous_id
     ret["base_classes"] = base_classes
     return ret
+
+def _get_severstal_instances_meta():
+    thing_ids = [k["id"] for k in SEVERSTAL_CATEGORIES if k["isthing"] == 1]
+    thing_colors = [k["color"] for k in SEVERSTAL_CATEGORIES if k["isthing"] == 1]
+    assert len(thing_ids) == 4, len(thing_ids)
+    # Mapping from the incontiguous COCO category id to an id in [0, 79]
+    thing_dataset_id_to_contiguous_id = {k: i for i, k in enumerate(thing_ids)}
+    thing_classes = [k["name"] for k in SEVERSTAL_CATEGORIES if k["isthing"] == 1]
+    ret = {
+        "thing_dataset_id_to_contiguous_id": thing_dataset_id_to_contiguous_id,
+        "thing_classes": thing_classes,
+        "thing_colors": thing_colors,
+    }
+    return ret
+
+def _get_severstal_fewshot_instances_meta():
+    ret = _get_kili_instances_meta()
+    novel_ids = [k["id"] for k in SEVERSTAL_CATEGORIES if k["isthing"] == 1]
+    novel_dataset_id_to_contiguous_id = {k: i for i, k in enumerate(novel_ids)}
+    novel_classes = [
+        k["name"] for k in SEVERSTAL_CATEGORIES if k["isthing"] == 1
+    ]
+    base_categories = [
+        k
+        for k in SEVERSTAL_CATEGORIES
+        if k["isthing"] == 1 and k["name"] not in novel_classes
+    ]
+    base_ids = [k["id"] for k in base_categories]
+    base_dataset_id_to_contiguous_id = {k: i for i, k in enumerate(base_ids)}
+    base_classes = [k["name"] for k in base_categories]
+    ret[
+        "novel_dataset_id_to_contiguous_id"
+    ] = novel_dataset_id_to_contiguous_id
+    ret["novel_classes"] = novel_classes
+    ret["base_dataset_id_to_contiguous_id"] = base_dataset_id_to_contiguous_id
+    ret["base_classes"] = base_classes
+    return ret
+
 def _get_lvis_instances_meta_v0_5():
     from .lvis_v0_5_categories import LVIS_CATEGORIES
 
